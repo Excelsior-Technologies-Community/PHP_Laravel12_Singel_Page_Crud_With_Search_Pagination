@@ -1,59 +1,375 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PHP_Laravel12_Singel_Page_Crud_With_Search_Paginatio
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Step 1 : Install Laravel 12 and Create new project
 
-## About Laravel
+```php
+composer create-project laravel/laravel PHP_Laravel12_Singel_Page_Crud_With_Search_Pagination
+```
+# Step 2 : Setup Database for.env file
+```php
+ DB_CONNECTION=mysql
+ DB_HOST=127.0.0.1
+ DB_PORT=3306
+ DB_DATABASE=your database name
+ DB_USERNAME=root
+ DB_PASSWORD=
+```
+# Now Create Single Page Crud With Searching and pagination: 
+# Step 3 : Create Migration For Database Table
+```php
+php  artisan make:migration create_items_table
+```
+Migration File
+database/migrations/xxxx_xx_xx_create_items_table.php
+```php
+<?php
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('items', function (Blueprint $table) {
+            $table->id();
+            $table ->string('name');
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
+            $table->timestamps();
+        });
+    }
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('items');
+    }
+};
+```
+# Run Migration
+```php
+php artisan migrate
+```
 
-## Learning Laravel
+# Step 4 : Create Model For Item
+```php
+php artisan make:model Item
+```
+Model File
+app/Models/Item.php
+```php
+<?php
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+namespace App\Models;
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+use Illuminate\Database\Eloquent\Model;
 
-## Laravel Sponsors
+class Item extends Model
+{
+protected $fillable = [
+    'name',
+    'description',
+    'image',
+];
+}
+```
+# Step 5 : Create Controller 
+```php
+php artisan make:controller ItemController
+```
+Controller File
+app/Http/Controllers/ItemController.php
+```php
+<?php
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+namespace App\Http\Controllers;
 
-### Premium Partners
+use Illuminate\Http\Request;
+use App\Models\Item;
+class ItemController extends Controller
+{
+public function index(Request $request)
+{
+    $search = $request->search;
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    $items = Item::when($search, function ($query, $search) {
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%");
+        })
+        ->latest()
+        ->paginate(3)
+        ->withQueryString();
 
-## Contributing
+    $editItem = null;
+    if ($request->has('edit_id')) {
+        $editItem = Item::find($request->edit_id);
+    }
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    $mode = $request->mode; // 👈 create | null
 
-## Code of Conduct
+    return view('items.index', compact('items', 'editItem', 'search', 'mode'));
+}
+ public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'image' => 'nullable|image',
+        ]);
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+        $imageName = null;
 
-## Security Vulnerabilities
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('image'), $imageName);
+        }
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+        Item::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'image' => $imageName,
+        ]);
 
-## License
+        return redirect()->route('items.index');
+    }
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    // UPDATE
+    public function update(Request $request, Item $item)
+    {
+        $request->validate([
+            'name' => 'required',
+            'image' => 'nullable|image',
+        ]);
+
+        $imageName = $item->image;
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('image'), $imageName);
+        }
+
+        $item->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'image' => $imageName,
+        ]);
+
+        return redirect()->route('items.index');
+    }
+
+    // DELETE
+    public function destroy(Item $item)
+    {
+        $item->delete();
+        return redirect()->route('items.index');
+    }
+}
+```
+# Step 6 : Create Route for routes/web.php
+```php
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ItemController;
+
+Route::get('/', [ItemController::class, 'index'])->name('items.index');
+Route::post('/store', [ItemController::class, 'store'])->name('items.store');
+Route::post('/update/{item}', [ItemController::class, 'update'])->name('items.update');
+Route::get('/delete/{item}', [ItemController::class, 'destroy'])->name('items.delete');
+```
+
+# Step 7 : Now Create Blade file For resource/view/items folder:
+# resources/views/items/index.blade.php
+```php
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Single Page CRUD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    {{-- HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Items</h3>
+
+        {{-- CREATE BUTTON --}}
+        <a href="{{ route('items.index', ['mode' => 'create']) }}"
+           class="btn btn-success">
+            + Create Item
+        </a>
+    </div>
+
+    {{-- ========================= --}}
+    {{-- CREATE / EDIT FORM --}}
+    {{-- ========================= --}}
+    @if($mode === 'create' || $editItem)
+
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h5 class="mb-3">
+                {{ $editItem ? 'Edit Item' : 'Add Item' }}
+            </h5>
+
+            <form method="POST"
+                  action="{{ $editItem ? route('items.update', $editItem->id) : route('items.store') }}"
+                  enctype="multipart/form-data">
+
+                @csrf
+
+                <div class="mb-2">
+                    <label>Name</label>
+                    <input type="text" name="name" class="form-control"
+                           value="{{ $editItem->name ?? '' }}">
+                </div>
+
+                <div class="mb-2">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control">{{ $editItem->description ?? '' }}</textarea>
+                </div>
+
+                <div class="mb-2">
+                    <label>Image</label>
+                    <input type="file" name="image" class="form-control"
+                           onchange="previewImage(event)">
+                </div>
+
+                {{-- OLD IMAGE --}}
+                @if($editItem && $editItem->image)
+                    <div class="mb-2">
+                        <label>Old Image</label><br>
+                        <img src="{{ asset('image/'.$editItem->image) }}" width="80">
+                    </div>
+                @endif
+
+                {{-- NEW PREVIEW --}}
+                <div class="mb-2">
+                    <label>New Image Preview</label><br>
+                    <img id="imagePreview" style="display:none;" width="120">
+                </div>
+
+                <button class="btn btn-primary">
+                    {{ $editItem ? 'Update' : 'Save' }}
+                </button>
+
+                <a href="{{ route('items.index') }}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </form>
+
+        </div>
+    </div>
+    @endif
+
+    {{-- ========================= --}}
+    {{-- SEARCH --}}
+    {{-- ========================= --}}
+    <form method="get" action="{{ route('items.index') }}" class="mb-3">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text"
+                       name="search"
+                       value="{{ $search ?? '' }}"
+                       class="form-control"
+                       placeholder="Search name or description">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary">Search</button>
+                <a href="{{ route('items.index') }}" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    {{-- ========================= --}}
+    {{-- LIST --}}
+    {{-- ========================= --}}
+    <table class="table table-bordered">
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th width="150">Action</th>
+        </tr>
+
+        @foreach($items as $item)
+        <tr>
+            <td>
+                @if($item->image)
+                    <img src="{{ asset('image/'.$item->image) }}" width="60">
+                @endif
+            </td>
+            <td>{{ $item->name }}</td>
+            <td>{{ $item->description }}</td>
+            <td>
+                <a href="{{ route('items.index', ['edit_id' => $item->id]) }}"
+                   class="btn btn-sm btn-warning">Edit</a>
+
+                <a href="{{ route('items.delete', $item->id) }}"
+                   onclick="return confirm('Delete?')"
+                   class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        @endforeach
+    </table>
+
+    {{-- PAGINATION --}}
+    <div class="mt-3">
+        {{ $items->links('pagination::bootstrap-5') }}
+    </div>
+
+</div>
+
+{{-- IMAGE PREVIEW --}}
+<script>
+function previewImage(event) {
+    const preview = document.getElementById('imagePreview');
+    const file = event.target.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+
+</body>
+</html>
+```
+
+
+# Step 8 : Last Run Server and paste this url
+```php
+php artisan serve
+http://127.0.0.1:8000/
+```
+ <img width="1652" height="759" alt="image" src="https://github.com/user-attachments/assets/f96f8d76-099a-4f4b-944e-e6272146aee2" />
+
+
+# Now Click Create Item and Show Create Form  For this Current index page .
+ <img width="1410" height="835" alt="image" src="https://github.com/user-attachments/assets/c2130d44-17b4-4cca-8fff-321c3ebabb68" />
+
+ <img width="1369" height="909" alt="image" src="https://github.com/user-attachments/assets/aa9dd471-682c-46a5-b659-0265af99ffd6" />
+
+
+
+
+
+
+
+
+
+
+
