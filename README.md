@@ -1,4 +1,4 @@
-# PHP_Laravel12_Singel_Page_Crud_With_Search_Paginatio
+# PHP_Laravel12_Singel_Page_Crud_With_Search_Pagination
 
 # Step 1 : Install Laravel 12 and Create new project
 
