@@ -325,13 +325,61 @@ class ItemController extends Controller
         ]);
     }
 
-    public function show($id)
-    {
-        $item = Item::with(['comments.user', 'favorites'])->findOrFail($id);
-        $item->increment('views');
+public function show($id)
+{
+    $item = Item::findOrFail($id);
 
-        return response()->json(['success' => true, 'item' => $item]);
-    }
+    // Increment item views
+    $item->increment('views');
+
+    // ---------------------------------------------------------
+    // RECENTLY VIEWED ITEMS
+    // ---------------------------------------------------------
+    $recentlyViewed = session()->get('recently_viewed', []);
+
+    // Remove current item if already present
+    $recentlyViewed = array_values(
+        array_filter($recentlyViewed, function ($itemId) use ($id) {
+            return (int) $itemId !== (int) $id;
+        })
+    );
+
+    // Add current item at the beginning
+    array_unshift($recentlyViewed, (int) $id);
+
+    // Keep only last 10 items
+    $recentlyViewed = array_slice($recentlyViewed, 0, 10);
+
+    session()->put('recently_viewed', $recentlyViewed);
+
+    // ---------------------------------------------------------
+    // EXISTING GALLERY DATA
+    // ---------------------------------------------------------
+    $item->gallery_image_urls = collect($item->images ?? [])
+        ->map(function ($image) use ($item) {
+            return $item->resolveImageUrl($image);
+        })
+        ->values()
+        ->toArray();
+
+    return response()->json([
+        'success' => true,
+        'item' => [
+            'id' => $item->id,
+            'name' => $item->name,
+            'description' => $item->description,
+            'category' => $item->category,
+            'status' => $item->status,
+            'price' => $item->price,
+            'views' => $item->views,
+            'average_rating' => $item->average_rating,
+            'rating_count' => $item->rating_count,
+            'display_image_url' => $item->display_image_url,
+            'gallery_image_urls' => $item->gallery_image_urls,
+            'created_at' => optional($item->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ]);
+}
 
     public function toggleFavorite($id)
     {

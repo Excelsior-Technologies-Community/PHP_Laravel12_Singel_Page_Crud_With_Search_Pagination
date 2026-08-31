@@ -5,8 +5,11 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\RecentlyViewedController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', [ItemController::class, 'index'])->name('items.index');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/store', [ItemController::class, 'store'])->name('items.store');
 Route::match(['post', 'put'], '/update/{item}', [ItemController::class, 'update'])->name('items.update');
 Route::delete('/delete/{item}', [ItemController::class, 'destroy'])->name('items.delete');
@@ -17,7 +20,6 @@ Route::post('/duplicate/{id}', [ItemController::class, 'duplicate'])->name('item
 Route::post('/import-csv', [ItemController::class, 'importCsv'])->name('items.import-csv');
 Route::get('/export-csv', [ItemController::class, 'exportCsv'])->name('items.export-csv');
 Route::get('/show/{id}', [ItemController::class, 'show'])->name('items.show');
-Route::post('/favorite/{id}', [ItemController::class, 'toggleFavorite'])->name('items.favorite');
 Route::delete('/image/{id}/{image}', [ItemController::class, 'deleteImage'])->name('items.delete-image');
 
 Route::get('/trash', [ItemController::class, 'trash'])->name('items.trash');
@@ -32,4 +34,17 @@ Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('c
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 Route::get('/comments/{item}', [CommentController::class, 'itemComments'])->name('comments.item');
 
+
+Route::post('/favorite/{id}', [FavoriteController::class, 'toggle'])->name('items.favorite');
+
 Route::get('/favorites', [FavoriteController::class, 'myFavorites'])->name('favorites.index');
+
+// Recently Viewed
+Route::get('/recently-viewed', [RecentlyViewedController::class, 'index'])
+    ->name('recently-viewed.index');
+
+Route::post('/recently-viewed/clear', [RecentlyViewedController::class, 'clear'])
+    ->name('recently-viewed.clear');
+
+Route::delete('/recently-viewed/{id}', [RecentlyViewedController::class, 'remove'])
+    ->name('recently-viewed.remove');
