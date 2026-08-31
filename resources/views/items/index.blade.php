@@ -98,6 +98,9 @@
 {{-- SIDEBAR --}}
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">Menu</div>
+    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
     <a href="{{ route('items.index') }}" class="{{ request()->routeIs('items.index') && !request()->trash ? 'active' : '' }}">
         <i class="bi bi-house"></i> Items
     </a>
@@ -109,6 +112,9 @@
     </a>
     <a href="{{ route('favorites.index') }}" class="{{ request()->routeIs('favorites.index') ? 'active' : '' }}">
         <i class="bi bi-star"></i> My Favorites
+    </a>
+    <a href="{{ route('recently-viewed.index') }}" class="{{ request()->routeIs('recently-viewed.index') ? 'active' : '' }}">
+        <i class="bi bi-clock-history"></i> Recently Viewed
     </a>
 </div>
 
@@ -617,22 +623,88 @@ function addComment(event, itemId) {
     });
 }
 
+
 // Favorite
 function toggleFavorite(id) {
-    $.post(`/favorite/${id}`, { _token: '{{ csrf_token() }}' }, function(data) {
-        if (data.success) {
-            const icon = document.querySelector(`.favorite-btn[data-item-id="${id}"] i`);
-            if (icon) {
-                icon.className = data.is_favorite ? 'bi bi-star-fill' : 'bi bi-star';
+
+    const button = document.querySelector(
+        `.favorite-btn[data-item-id="${id}"]`
+    );
+
+    const icon = button ? button.querySelector('i') : null;
+
+    // Prevent double clicks
+    if (button) {
+        button.disabled = true;
+    }
+
+    $.ajax({
+        url: `/favorite/${id}`,
+        type: 'POST',
+
+        data: {
+            _token: '{{ csrf_token() }}'
+        },
+
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+
+        success: function(response) {
+
+            if (response.success) {
+
+                // Update star icon
+                if (icon) {
+                    if (response.is_favorite) {
+                        icon.className = 'bi bi-star-fill';
+                    } else {
+                        icon.className = 'bi bi-star';
+                    }
+                }
+
+                // Update button title
+                if (button) {
+                    button.title = response.is_favorite
+                        ? 'Remove from favorites'
+                        : 'Add to favorites';
+                }
+
+                showToast(response.message, 'success');
+
+            } else {
+
+                showToast(
+                    response.message || 'Favorite update failed',
+                    'danger'
+                );
             }
-            showToast(data.message, 'success');
-        } else {
-            showToast(data.message || 'Favorite update failed', 'danger');
+        },
+
+        error: function(xhr) {
+
+            console.error('Favorite Error:', xhr.responseText);
+
+            let message = 'Favorite update failed';
+
+            if (xhr.responseJSON) {
+                message = xhr.responseJSON.message || message;
+            }
+
+            showToast(message, 'danger');
+        },
+
+        complete: function() {
+
+            if (button) {
+                button.disabled = false;
+            }
         }
-    }).fail(function() {
-        showToast('Favorite update failed', 'danger');
     });
 }
+
+
 
 // Delete Item
 function deleteItem(id, name) {
