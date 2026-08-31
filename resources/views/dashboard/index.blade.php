@@ -1,151 +1,417 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>Item Statistics Dashboard</title>
+<title>Dashboard</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-        rel="stylesheet"
-    >
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+>
 
-    <style>
+<style>
+    body {
+        background: #f5f7fb;
+        font-family: Arial, sans-serif;
+    }
 
-        body {
-            background: #f5f7fb;
+    .sidebar {
+        min-height: 100vh;
+        background: #111827;
+        color: white;
+        padding: 25px 15px;
+    }
+
+    .sidebar-title {
+        font-size: 22px;
+        font-weight: 700;
+        padding: 10px 15px 25px;
+    }
+
+    .sidebar a {
+        display: block;
+        color: #cbd5e1;
+        text-decoration: none;
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+        background: #2563eb;
+        color: white;
+    }
+
+    .main {
+        padding: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 22px;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        transition: .2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, .07);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 22px;
+    }
+
+    .stat-number {
+        font-size: 30px;
+        font-weight: 700;
+        margin-top: 12px;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .panel {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 22px;
+        height: 100%;
+    }
+
+    .panel-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .item-row:last-child {
+        border-bottom: 0;
+    }
+
+    .badge-soft {
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 20px;
+    }
+
+    .filter-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 25px;
+    }
+
+    .filter-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    @media(max-width: 768px) {
+        .sidebar {
+            min-height: auto;
         }
 
-        .dashboard-card {
-            border: none;
-            border-radius: 15px;
-            transition: all 0.2s ease;
+        .main {
+            padding: 18px;
         }
+    }
+</style>
 
-        .dashboard-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-
-        .stat-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 25px;
-        }
-
-        .stat-number {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .chart-bar {
-            height: 12px;
-            border-radius: 10px;
-            background: #e9ecef;
-            overflow: hidden;
-        }
-
-        .chart-bar-fill {
-            height: 100%;
-            border-radius: 10px;
-            background: #0d6efd;
-        }
-
-        .item-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .section-card {
-            border: none;
-            border-radius: 15px;
-        }
-
-    </style>
 
 </head>
 
 <body>
 
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid">
 
-    {{-- HEADER --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="row">
 
-        <div>
+    {{-- =====================================================
+         SIDEBAR
+    ====================================================== --}}
 
-            <h2 class="fw-bold mb-1">
-                <i class="bi bi-speedometer2"></i>
-                Item Statistics
-            </h2>
+    <div class="col-lg-2 sidebar">
 
-            <p class="text-muted mb-0">
-                Overview of your item management system
-            </p>
-
+        <div class="sidebar-title">
+            <i class="bi bi-grid"></i>
+            Admin Panel
         </div>
 
-        <div>
+        <a
+            href="{{ route('dashboard') }}"
+            class="active"
+        >
+            <i class="bi bi-speedometer2 me-2"></i>
+            Dashboard
+        </a>
 
-            <a
-                href="{{ route('items.index') }}"
-                class="btn btn-primary"
+        <a href="{{ route('items.index') }}">
+            <i class="bi bi-box me-2"></i>
+            Items
+        </a>
+
+        <a href="{{ route('favorites.index') }}">
+            <i class="bi bi-star me-2"></i>
+            Favorites
+        </a>
+
+        <a href="{{ route('recently-viewed.index') }}">
+            <i class="bi bi-clock-history me-2"></i>
+            Recently Viewed
+        </a>
+
+        <a href="{{ route('activity-logs.index') }}">
+            <i class="bi bi-activity me-2"></i>
+            Activity Logs
+        </a>
+
+    </div>
+
+
+    {{-- =====================================================
+         MAIN CONTENT
+    ====================================================== --}}
+
+    <div class="col-lg-10 main">
+
+        {{-- HEADER --}}
+
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+            <div>
+
+                <h2 class="fw-bold mb-1">
+                    Dashboard
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Overview of your application
+                </p>
+
+            </div>
+
+            {{-- DATE FILTER --}}
+
+            <form
+                method="GET"
+                action="{{ route('dashboard') }}"
             >
-                <i class="bi bi-box-seam"></i>
-                Manage Items
-            </a>
+
+                <label class="filter-label">
+                    Dashboard Period
+                </label>
+
+                <select
+                    name="period"
+                    class="form-select"
+                    onchange="this.form.submit()"
+                >
+
+                    <option
+                        value="all"
+                        {{ ($period ?? 'all') === 'all' ? 'selected' : '' }}
+                    >
+                        All Time
+                    </option>
+
+                    <option
+                        value="today"
+                        {{ ($period ?? '') === 'today' ? 'selected' : '' }}
+                    >
+                        Today
+                    </option>
+
+                    <option
+                        value="7days"
+                        {{ ($period ?? '') === '7days' ? 'selected' : '' }}
+                    >
+                        Last 7 Days
+                    </option>
+
+                    <option
+                        value="30days"
+                        {{ ($period ?? '') === '30days' ? 'selected' : '' }}
+                    >
+                        Last 30 Days
+                    </option>
+
+                </select>
+
+            </form>
 
         </div>
 
-    </div>
+
+        {{-- =====================================================
+             ACTIVE FILTER DISPLAY
+        ====================================================== --}}
+
+        @if(($period ?? 'all') !== 'all')
+
+            <div class="alert alert-primary border-0 shadow-sm">
+
+                <i class="bi bi-calendar3 me-2"></i>
+
+                Showing dashboard statistics for:
+
+                <strong>
+                    @if($period === 'today')
+                        Today
+                    @elseif($period === '7days')
+                        Last 7 Days
+                    @elseif($period === '30days')
+                        Last 30 Days
+                    @endif
+                </strong>
+
+                <a
+                    href="{{ route('dashboard') }}"
+                    class="float-end text-decoration-none"
+                >
+                    Reset
+                </a>
+
+            </div>
+
+        @endif
 
 
-    {{-- STATISTICS --}}
-    <div class="row g-4 mb-4">
+        {{-- =====================================================
+             FIRST STATISTICS ROW
+        ====================================================== --}}
 
-        {{-- TOTAL ITEMS --}}
-        <div class="col-md-6 col-xl-3">
+        <div class="row g-4 mb-4">
 
-            <div class="card dashboard-card h-100">
+            {{-- TOTAL ITEMS --}}
 
-                <div class="card-body">
+            <div class="col-md-6 col-xl-3">
 
-                    <div class="d-flex justify-content-between">
+                <div class="stat-card">
 
-                        <div>
+                    <div class="stat-icon">
+                        <i class="bi bi-box"></i>
+                    </div>
 
-                            <div class="text-muted">
-                                Total Items
-                            </div>
+                    <div class="stat-number">
+                        {{ number_format($totalItems ?? 0) }}
+                    </div>
 
-                            <div class="stat-number">
-                                {{ number_format($totalItems) }}
-                            </div>
+                    <div class="stat-label">
+                        Total Items
+                    </div>
 
-                        </div>
+                </div>
 
-                        <div class="stat-icon bg-primary-subtle text-primary">
-                            <i class="bi bi-box-seam"></i>
-                        </div>
+            </div>
 
+
+            {{-- ACTIVE ITEMS --}}
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($activeItems ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Active Items
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- TOTAL VIEWS --}}
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-eye"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($totalViews ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Total Views
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- FAVORITES --}}
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-star"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($totalFavorites ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Total Favorites
                     </div>
 
                 </div>
@@ -155,171 +421,174 @@
         </div>
 
 
-        {{-- ACTIVE --}}
-        <div class="col-md-6 col-xl-3">
+        {{-- =====================================================
+             SECOND STATISTICS ROW
+        ====================================================== --}}
 
-            <div class="card dashboard-card h-100">
+        <div class="row g-4 mb-4">
 
-                <div class="card-body">
+            {{-- COMMENTS --}}
 
-                    <div class="d-flex justify-content-between">
+            <div class="col-md-6 col-xl-3">
 
-                        <div>
+                <div class="stat-card">
 
-                            <div class="text-muted">
-                                Active Items
-                            </div>
-
-                            <div class="stat-number text-success">
-                                {{ number_format($activeItems) }}
-                            </div>
-
-                        </div>
-
-                        <div class="stat-icon bg-success-subtle text-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-
+                    <div class="stat-icon">
+                        <i class="bi bi-chat"></i>
                     </div>
 
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- VIEWS --}}
-        <div class="col-md-6 col-xl-3">
-
-            <div class="card dashboard-card h-100">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between">
-
-                        <div>
-
-                            <div class="text-muted">
-                                Total Views
-                            </div>
-
-                            <div class="stat-number text-info">
-                                {{ number_format($totalViews) }}
-                            </div>
-
-                        </div>
-
-                        <div class="stat-icon bg-info-subtle text-info">
-                            <i class="bi bi-eye"></i>
-                        </div>
-
+                    <div class="stat-number">
+                        {{ number_format($totalComments ?? 0) }}
                     </div>
 
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- FAVORITES --}}
-        <div class="col-md-6 col-xl-3">
-
-            <div class="card dashboard-card h-100">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between">
-
-                        <div>
-
-                            <div class="text-muted">
-                                Total Favorites
-                            </div>
-
-                            <div class="stat-number text-warning">
-                                {{ number_format($totalFavorites) }}
-                            </div>
-
-                        </div>
-
-                        <div class="stat-icon bg-warning-subtle text-warning">
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- SECOND ROW --}}
-    <div class="row g-4 mb-4">
-
-        {{-- INACTIVE --}}
-        <div class="col-md-6 col-xl-3">
-
-            <div class="card dashboard-card">
-
-                <div class="card-body">
-
-                    <div class="text-muted">
-                        Inactive Items
-                    </div>
-
-                    <div class="stat-number text-secondary">
-                        {{ number_format($inactiveItems) }}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- COMMENTS --}}
-        <div class="col-md-6 col-xl-3">
-
-            <div class="card dashboard-card">
-
-                <div class="card-body">
-
-                    <div class="text-muted">
+                    <div class="stat-label">
                         Total Comments
                     </div>
 
-                    <div class="stat-number text-danger">
-                        {{ number_format($totalComments) }}
+                </div>
+
+            </div>
+
+
+            {{-- PENDING COMMENTS --}}
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($pendingComments ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Pending Comments
                     </div>
 
                 </div>
 
             </div>
 
-        </div>
+
+            {{-- APPROVED COMMENTS --}}
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($approvedComments ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Approved Comments
+                    </div>
+
+                </div>
+
+            </div>
 
 
-        {{-- RATING --}}
-        <div class="col-md-6 col-xl-3">
+            {{-- AVERAGE RATING --}}
 
-            <div class="card dashboard-card">
+            <div class="col-md-6 col-xl-3">
 
-                <div class="card-body">
+                <div class="stat-card">
 
-                    <div class="text-muted">
+                    <div class="stat-icon">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($averageRating ?? 0, 2) }}
+                    </div>
+
+                    <div class="stat-label">
                         Average Rating
                     </div>
 
-                    <div class="stat-number text-warning">
-                        {{ number_format($averageRating, 2) }}
-                        <small>/ 5</small>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             ACTIVITY STATISTICS
+        ====================================================== --}}
+
+        <div class="row g-4 mb-4">
+
+            {{-- TOTAL ACTIVITIES --}}
+
+            <div class="col-md-4">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-activity"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($totalActivities ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Total Activities
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- TODAY ACTIVITIES --}}
+
+            <div class="col-md-4">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($todayActivities ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Today's Activities
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- TODAY COMMENTS --}}
+
+            <div class="col-md-4">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+
+                    <div class="stat-number">
+                        {{ number_format($todayComments ?? 0) }}
+                    </div>
+
+                    <div class="stat-label">
+                        Today's Comments
                     </div>
 
                 </div>
@@ -329,141 +598,94 @@
         </div>
 
 
-        {{-- RECENTLY VIEWED --}}
-        <div class="col-md-6 col-xl-3">
+        {{-- =====================================================
+             CATEGORY + MOST VIEWED
+        ====================================================== --}}
 
-            <div class="card dashboard-card">
+        <div class="row g-4 mb-4">
 
-                <div class="card-body">
+            {{-- CATEGORY --}}
 
-                    <div class="text-muted">
-                        Recently Viewed
-                    </div>
+            <div class="col-lg-6">
 
-                    <div class="stat-number text-primary">
-                        {{ count(session('recently_viewed', [])) }}
-                    </div>
+                <div class="panel">
 
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- CATEGORY + MOST VIEWED --}}
-    <div class="row g-4 mb-4">
-
-        {{-- CATEGORY STATISTICS --}}
-        <div class="col-lg-6">
-
-            <div class="card section-card">
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-tags"></i>
+                    <div class="panel-title">
+                        <i class="bi bi-tags me-2"></i>
                         Items by Category
-                    </h5>
+                    </div>
 
-                    @if($categoryStats->count() > 0)
+                    @forelse($categoryStats as $category)
 
-                        @php
-                            $maxCategory =
-                                $categoryStats->max('total') ?: 1;
-                        @endphp
+                        <div class="item-row">
 
-                        @foreach($categoryStats as $category)
+                            <strong>
+                                {{ $category->category }}
+                            </strong>
 
-                            <div class="mb-3">
+                            <span class="badge-soft">
+                                {{ $category->total }}
+                            </span>
 
-                                <div class="d-flex justify-content-between mb-1">
+                        </div>
 
-                                    <span>
-                                        {{ $category->category }}
-                                    </span>
+                    @empty
 
-                                    <strong>
-                                        {{ $category->total }}
-                                    </strong>
-
-                                </div>
-
-                                <div class="chart-bar">
-
-                                    <div
-                                        class="chart-bar-fill"
-                                        style="
-                                            width:
-                                            {{ ($category->total / $maxCategory) * 100 }}%;
-                                        "
-                                    ></div>
-
-                                </div>
-
-                            </div>
-
-                        @endforeach
-
-                    @else
-
-                        <p class="text-muted">
+                        <p class="text-muted mb-0">
                             No category data available.
                         </p>
 
-                    @endif
+                    @endforelse
 
                 </div>
 
             </div>
 
-        </div>
 
+            {{-- MOST VIEWED --}}
 
-        {{-- MOST VIEWED --}}
-        <div class="col-lg-6">
+            <div class="col-lg-6">
 
-            <div class="card section-card">
+                <div class="panel">
 
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-fire"></i>
+                    <div class="panel-title">
+                        <i class="bi bi-fire me-2"></i>
                         Most Viewed Items
-                    </h5>
+                    </div>
 
-                    @foreach($mostViewedItems as $item)
+                    @forelse($mostViewedItems as $item)
 
-                        <div class="d-flex align-items-center mb-3">
+                        <div class="item-row">
 
-                            <img
-                                src="{{ $item->display_image_url }}"
-                                class="item-image me-3"
-                                alt="{{ $item->name }}"
-                            >
-
-                            <div class="flex-grow-1">
+                            <div>
 
                                 <strong>
                                     {{ $item->name }}
                                 </strong>
 
                                 <div class="small text-muted">
-                                    {{ $item->category ?? 'N/A' }}
+                                    {{ $item->category }}
                                 </div>
 
                             </div>
 
-                            <span class="badge bg-info">
-                                <i class="bi bi-eye"></i>
+                            <span class="badge-soft">
+
+                                <i class="bi bi-eye me-1"></i>
+
                                 {{ number_format($item->views) }}
+
                             </span>
 
                         </div>
 
-                    @endforeach
+                    @empty
+
+                        <p class="text-muted mb-0">
+                            No items available.
+                        </p>
+
+                    @endforelse
 
                 </div>
 
@@ -471,61 +693,57 @@
 
         </div>
 
-    </div>
 
+        {{-- =====================================================
+             RATING + FAVORITES
+        ====================================================== --}}
 
-    {{-- THIRD ROW --}}
-    <div class="row g-4 mb-4">
+        <div class="row g-4 mb-4">
 
-        {{-- HIGHEST RATED --}}
-        <div class="col-lg-6">
+            {{-- HIGHEST RATED --}}
 
-            <div class="card section-card">
+            <div class="col-lg-6">
 
-                <div class="card-body">
+                <div class="panel">
 
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-star-fill text-warning"></i>
+                    <div class="panel-title">
+                        <i class="bi bi-trophy me-2"></i>
                         Highest Rated Items
-                    </h5>
+                    </div>
 
                     @forelse($highestRatedItems as $item)
 
-                        <div class="d-flex align-items-center mb-3">
+                        <div class="item-row">
 
-                            <img
-                                src="{{ $item->display_image_url }}"
-                                class="item-image me-3"
-                                alt="{{ $item->name }}"
-                            >
-
-                            <div class="flex-grow-1">
+                            <div>
 
                                 <strong>
                                     {{ $item->name }}
                                 </strong>
 
-                                <div class="small">
+                                <div class="small text-muted">
 
-                                    <span class="text-warning">
-                                        ★
-                                    </span>
+                                    {{ $item->rating_count }}
 
-                                    {{ number_format($item->average_rating, 1) }}
-
-                                    <span class="text-muted">
-                                        ({{ $item->rating_count }} reviews)
-                                    </span>
+                                    ratings
 
                                 </div>
 
                             </div>
 
+                            <span class="badge bg-warning text-dark">
+
+                                <i class="bi bi-star-fill"></i>
+
+                                {{ number_format($item->average_rating, 1) }}
+
+                            </span>
+
                         </div>
 
                     @empty
 
-                        <p class="text-muted">
+                        <p class="text-muted mb-0">
                             No ratings available.
                         </p>
 
@@ -535,46 +753,37 @@
 
             </div>
 
-        </div>
 
+            {{-- MOST FAVORITED --}}
 
-        {{-- MOST FAVORITED --}}
-        <div class="col-lg-6">
+            <div class="col-lg-6">
 
-            <div class="card section-card">
+                <div class="panel">
 
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-heart-fill text-danger"></i>
+                    <div class="panel-title">
+                        <i class="bi bi-heart me-2"></i>
                         Most Favorited Items
-                    </h5>
+                    </div>
 
                     @forelse($mostFavoritedItems as $item)
 
-                        <div class="d-flex align-items-center mb-3">
+                        <div class="item-row">
 
-                            <img
-                                src="{{ $item->display_image_url }}"
-                                class="item-image me-3"
-                                alt="{{ $item->name }}"
-                            >
-
-                            <div class="flex-grow-1">
+                            <div>
 
                                 <strong>
                                     {{ $item->name }}
                                 </strong>
 
                                 <div class="small text-muted">
-                                    {{ $item->category ?? 'N/A' }}
+                                    {{ $item->category }}
                                 </div>
 
                             </div>
 
-                            <span class="badge bg-danger">
+                            <span class="badge-soft">
 
-                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-heart-fill"></i>
 
                                 {{ $item->favorites_count }}
 
@@ -584,8 +793,8 @@
 
                     @empty
 
-                        <p class="text-muted">
-                            No favorite data available.
+                        <p class="text-muted mb-0">
+                            No favorites available.
                         </p>
 
                     @endforelse
@@ -596,116 +805,273 @@
 
         </div>
 
-    </div>
 
+        {{-- =====================================================
+             RECENT ITEMS + QUICK SUMMARY
+        ====================================================== --}}
 
-    {{-- RECENT ITEMS --}}
-    <div class="card section-card">
+        <div class="row g-4">
 
-        <div class="card-body">
+            {{-- RECENT ITEMS --}}
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="col-lg-8">
 
-                <h5 class="fw-bold mb-0">
-                    <i class="bi bi-clock"></i>
-                    Recently Added Items
-                </h5>
+                <div class="panel">
 
-                <a
-                    href="{{ route('items.index') }}"
-                    class="btn btn-sm btn-outline-primary"
-                >
-                    View All
-                </a>
+                    <div class="panel-title">
+                        <i class="bi bi-clock me-2"></i>
+                        Recent Items
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead>
+
+                            <tr>
+
+                                <th>Item</th>
+
+                                <th>Category</th>
+
+                                <th>Status</th>
+
+                                <th>Created</th>
+
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            @forelse($recentItems as $item)
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            {{ $item->name }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        {{ $item->category ?: '-' }}
+                                    </td>
+
+                                    <td>
+
+                                        @if($item->status === 'active')
+
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+
+                                        @else
+
+                                            <span class="badge bg-secondary">
+                                                {{ ucfirst($item->status) }}
+                                            </span>
+
+                                        @endif
+
+                                    </td>
+
+                                    <td>
+                                        {{ optional($item->created_at)->format('d M Y') }}
+                                    </td>
+
+                                </tr>
+
+                            @empty
+
+                                <tr>
+
+                                    <td
+                                        colspan="4"
+                                        class="text-center text-muted"
+                                    >
+                                        No recent items found.
+                                    </td>
+
+                                </tr>
+
+                            @endforelse
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
 
             </div>
 
-            <div class="table-responsive">
 
-                <table class="table align-middle">
+            {{-- QUICK SUMMARY --}}
 
-                    <thead>
+            <div class="col-lg-4">
 
-                        <tr>
+                <div class="panel">
 
-                            <th>Item</th>
-                            <th>Category</th>
-                            <th>Status</th>
-                            <th>Price</th>
-                            <th>Views</th>
-                            <th>Created</th>
+                    <div class="panel-title">
+                        Quick Summary
+                    </div>
 
-                        </tr>
 
-                    </thead>
+                    {{-- ACTIVE ITEMS --}}
 
-                    <tbody>
+                    <div class="mb-4">
 
-                    @foreach($recentItems as $item)
+                        <div class="d-flex justify-content-between mb-2">
 
-                        <tr>
+                            <span>
+                                Active Items
+                            </span>
 
-                            <td>
+                            <strong>
+                                {{ $activeItems ?? 0 }}
+                            </strong>
 
-                                <div class="d-flex align-items-center">
+                        </div>
 
-                                    <img
-                                        src="{{ $item->display_image_url }}"
-                                        class="item-image me-3"
-                                        alt="{{ $item->name }}"
-                                    >
+                        @php
+                            $activePercentage = ($totalItems ?? 0) > 0
+                                ? (($activeItems ?? 0) / $totalItems) * 100
+                                : 0;
+                        @endphp
 
-                                    <strong>
-                                        {{ $item->name }}
-                                    </strong>
+                        <div class="progress">
 
-                                </div>
+                            <div
+                                class="progress-bar"
+                                style="width: {{ min($activePercentage, 100) }}%"
+                            ></div>
 
-                            </td>
+                        </div>
 
-                            <td>
-                                {{ $item->category ?? 'N/A' }}
-                            </td>
+                    </div>
 
-                            <td>
 
-                                <span
-                                    class="badge bg-{{
-                                        $item->status === 'active'
-                                            ? 'success'
-                                            : 'secondary'
-                                    }}"
-                                >
-                                    {{ ucfirst($item->status) }}
-                                </span>
+                    {{-- APPROVED COMMENTS --}}
 
-                            </td>
+                    <div class="mb-4">
 
-                            <td>
+                        <div class="d-flex justify-content-between mb-2">
 
-                                @if($item->price)
-                                    ${{ number_format($item->price, 2) }}
-                                @else
-                                    N/A
-                                @endif
+                            <span>
+                                Approved Comments
+                            </span>
 
-                            </td>
+                            <strong>
+                                {{ $approvedComments ?? 0 }}
+                            </strong>
 
-                            <td>
-                                {{ number_format($item->views) }}
-                            </td>
+                        </div>
 
-                            <td>
-                                {{ $item->created_at->format('d M Y') }}
-                            </td>
+                        @php
+                            $commentPercentage = ($totalComments ?? 0) > 0
+                                ? (($approvedComments ?? 0) / $totalComments) * 100
+                                : 0;
+                        @endphp
 
-                        </tr>
+                        <div class="progress">
 
-                    @endforeach
+                            <div
+                                class="progress-bar"
+                                style="width: {{ min($commentPercentage, 100) }}%"
+                            ></div>
 
-                    </tbody>
+                        </div>
 
-                </table>
+                    </div>
+
+
+                    {{-- PENDING COMMENTS --}}
+
+                    <div class="mb-4">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+                                Pending Comments
+                            </span>
+
+                            <strong>
+                                {{ $pendingComments ?? 0 }}
+                            </strong>
+
+                        </div>
+
+                        @php
+                            $pendingPercentage = ($totalComments ?? 0) > 0
+                                ? (($pendingComments ?? 0) / $totalComments) * 100
+                                : 0;
+                        @endphp
+
+                        <div class="progress">
+
+                            <div
+                                class="progress-bar bg-warning"
+                                style="width: {{ min($pendingPercentage, 100) }}%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- TODAY ACTIVITY --}}
+
+                    <div class="mb-3">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+                                Today's Activities
+                            </span>
+
+                            <strong>
+                                {{ $todayActivities ?? 0 }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- TODAY COMMENTS --}}
+
+                    <div class="mb-4">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+                                Today's Comments
+                            </span>
+
+                            <strong>
+                                {{ $todayComments ?? 0 }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{{ route('activity-logs.index') }}"
+                        class="btn btn-primary w-100"
+                    >
+
+                        <i class="bi bi-activity me-1"></i>
+
+                        View Activity Logs
+
+                    </a>
+
+                </div>
 
             </div>
 
@@ -715,5 +1081,9 @@
 
 </div>
 
+
+</div>
+
 </body>
+
 </html>
