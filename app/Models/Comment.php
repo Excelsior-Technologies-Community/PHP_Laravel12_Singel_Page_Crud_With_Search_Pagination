@@ -11,6 +11,7 @@ class Comment extends Model
         'item_id',
         'comment',
         'rating',
+        'status',
     ];
 
     protected $casts = [
